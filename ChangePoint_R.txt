@@ -1,0 +1,43 @@
+
+CHANGE POINT: 
+# Load required libraries
+library(changepoint)
+
+# Read the dataset from a CSV file
+data <- read.csv("elderly_data.csv")
+
+# Rename columns for convenience
+names(data) <- c("Number_Falls_Pass12Months", "MMS_score", "NPI_Score", "Number_of_Fall_M1", "Number_of_Fall_M2", "Number_of_Fall_M3", "Number_of_Fall_M4", "Number_of_Fall_M5", "Number_of_Fall_M6")
+
+# Select the variables of interest
+falls <- data[, c("Number_Falls_Pass12Months", "Number_of_Fall_M1", "Number_of_Fall_M2", "Number_of_Fall_M3", "Number_of_Fall_M4", "Number_of_Fall_M5", "Number_of_Fall_M6")]
+
+# Calculate the overall range of y-axis values
+y_range <- range(unlist(falls))
+
+# Perform change point detection for each variable
+cpt_list <- lapply(falls, function(x) cpt.mean(x, method = "PELT"))
+
+# Plot the change point results
+par(mfrow = c(3, 3))  # Adjust the number of rows and columns based on the number of variables
+for (i in 1:length(falls)) {
+  plot(cpt_list[[i]], main = names(falls)[i], xlab = "Time", ylab = "Number of Falls", col.main = "darkblue", col.lab = "darkblue", col.axis = "darkblue", col = "darkblue", ylim = c(0, max(falls[[i]])))
+}
+
+The `cpt.mean()` function with `method = "PELT"` performs change point detection using the Pruned Exact Linear Time (PELT) algorithm assuming a mean shift model. PELT is a dynamic programming algorithm that finds the optimal change points while considering penalties for both the number of change points and the size of the changes.
+
+The general syntax of the `cpt.mean()` function with PELT is as follows:
+
+```R
+cpt.mean(x, method = "PELT", Q = 0.05)
+```
+
+The parameters of the function are:
+
+- `x`: A numeric vector or time series object representing the data.
+- `method`: The method used for change point detection. In this case, it is set to "PELT" to use the PELT algorithm.
+- `Q`: The significance level for change point detection. It represents the acceptable false-positive rate. The default value is 0.05 (5%).
+
+The function returns an object of class `"changepoint"` that contains information about the detected change points, such as the locations, the corresponding segment means, and statistical measures of significance.
+
+In the provided code, the `cpt.mean()` function with `method = "PELT"` is applied to each variable in the `falls` data frame using the `lapply()` function. The resulting change point objects are stored in the `cpt_list` list, which will contain the change point detection results for each variable in the dataset.
